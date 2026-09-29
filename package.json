@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "db:generate": "prisma generate",
-    "db:setup": "prisma db execute --file tablas.sql",
+    "db:setup": "prisma db execute --schema prisma/schema.prisma --file tablas.sql",
     "db:studio": "prisma studio"
   },
   "dependencies": {
