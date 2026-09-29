@@ -18,7 +18,8 @@ npm run dev
 En `.env`, sustituye `YOUR_PASSWORD` por la contrasena de tu instancia PostgreSQL. Crea la base de datos `siam_db` y ejecuta el esquema:
 
 ```powershell
-psql -U postgres -d siam_db -f tablas.sql
+psql -U postgres -d postgres -c "CREATE DATABASE siam_db;"
+npm run db:setup
 ```
 
 Genera Prisma Client después de instalar dependencias o cambiar `prisma/schema.prisma`:
@@ -28,7 +29,7 @@ npm run db:generate
 npm run db:studio
 ```
 
-Prisma 6 se conecta al esquema SQL existente. `tablas.sql` sigue siendo la fuente de verdad para crear la base: incluye un índice único parcial para tickets activos que no está representado en este schema Prisma. No ejecutes `prisma db push` sobre esta base.
+`npm run db:setup` aplica las 12 tablas, tipos enum e índices de `tablas.sql` usando `DATABASE_URL` de `.env`; se puede volver a ejecutar sin recrear objetos existentes. El script conserva el índice único parcial para tickets activos que no está representado en el schema Prisma. `tablas.sql` es la fuente de verdad para crear el esquema; no ejecutes `prisma db push` sobre esta base.
 
 ## Interfaz
 

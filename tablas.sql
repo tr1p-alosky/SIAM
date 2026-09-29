@@ -1,18 +1,35 @@
+BEGIN;
+
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-CREATE TYPE rol_usuario AS ENUM ('ALUMNO', 'COORDINADOR', 'ADMINISTRADOR');
-CREATE TYPE tipo_tramite AS ENUM ('ALTA', 'BAJA', 'CAMBIO');
-CREATE TYPE categoria_materia AS ENUM ('CURRICULAR', 'INGLES', 'EXTRACURRICULAR');
-CREATE TYPE estado_ticket AS ENUM (
-    'CREADO',
-    'EN_REVISION_COORDINACION',
-    'APROBADO_ADMIN',
-    'RECHAZADO',
-    'APLICADO_SISTEMA',
-    'CERRADO'
-);
+DO $$ BEGIN
+    CREATE TYPE rol_usuario AS ENUM ('ALUMNO', 'COORDINADOR', 'ADMINISTRADOR');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE TABLE usuarios (
+DO $$ BEGIN
+    CREATE TYPE tipo_tramite AS ENUM ('ALTA', 'BAJA', 'CAMBIO');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE categoria_materia AS ENUM ('CURRICULAR', 'INGLES', 'EXTRACURRICULAR');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE estado_ticket AS ENUM (
+        'CREADO',
+        'EN_REVISION_COORDINACION',
+        'APROBADO_ADMIN',
+        'RECHAZADO',
+        'APLICADO_SISTEMA',
+        'CERRADO'
+    );
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+CREATE TABLE IF NOT EXISTS usuarios (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     expediente VARCHAR(20) UNIQUE NOT NULL,
     correo VARCHAR(150) UNIQUE NOT NULL,
@@ -25,13 +42,13 @@ CREATE TABLE usuarios (
     creado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE carreras (
+CREATE TABLE IF NOT EXISTS carreras (
     id SERIAL PRIMARY KEY,
     nombre VARCHAR(150) NOT NULL,
     clave VARCHAR(20) UNIQUE NOT NULL
 );
 
-CREATE TABLE informacion_academica_alumnos (
+CREATE TABLE IF NOT EXISTS informacion_academica_alumnos (
     alumno_id UUID PRIMARY KEY REFERENCES usuarios(id) ON DELETE CASCADE,
     carrera_id INT NOT NULL REFERENCES carreras(id),
     semestre_actual INT NOT NULL,
@@ -39,7 +56,7 @@ CREATE TABLE informacion_academica_alumnos (
     creditos_faltantes INT DEFAULT 0
 );
 
-CREATE TABLE materias (
+CREATE TABLE IF NOT EXISTS materias (
     id SERIAL PRIMARY KEY,
     carrera_id INT REFERENCES carreras(id) ON DELETE RESTRICT,
     clave VARCHAR(20) UNIQUE NOT NULL,
@@ -49,7 +66,7 @@ CREATE TABLE materias (
     prerrequisito_id INT REFERENCES materias(id)
 );
 
-CREATE TABLE grupos_materia (
+CREATE TABLE IF NOT EXISTS grupos_materia (
     id SERIAL PRIMARY KEY,
     materia_id INT NOT NULL REFERENCES materias(id) ON DELETE CASCADE,
     clave_grupo VARCHAR(10) NOT NULL,
@@ -59,7 +76,7 @@ CREATE TABLE grupos_materia (
     detalles_horario TEXT
 );
 
-CREATE TABLE periodos_academicos (
+CREATE TABLE IF NOT EXISTS periodos_academicos (
     id SERIAL PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL,
     fecha_inicio DATE NOT NULL,
@@ -68,7 +85,7 @@ CREATE TABLE periodos_academicos (
     esta_activo BOOLEAN DEFAULT TRUE
 );
 
-CREATE TABLE tickets (
+CREATE TABLE IF NOT EXISTS tickets (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     folio SERIAL UNIQUE,
     alumno_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE RESTRICT,
@@ -81,7 +98,7 @@ CREATE TABLE tickets (
     actualizado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE detalle_tickets (
+CREATE TABLE IF NOT EXISTS detalle_tickets (
     id SERIAL PRIMARY KEY,
     ticket_id UUID NOT NULL REFERENCES tickets(id) ON DELETE CASCADE,
     materia_id INT NOT NULL REFERENCES materias(id),
@@ -90,7 +107,7 @@ CREATE TABLE detalle_tickets (
     esta_aprobado BOOLEAN DEFAULT FALSE
 );
 
-CREATE TABLE adjuntos_ticket (
+CREATE TABLE IF NOT EXISTS adjuntos_ticket (
     id SERIAL PRIMARY KEY,
     ticket_id UUID NOT NULL REFERENCES tickets(id) ON DELETE CASCADE,
     url_archivo TEXT NOT NULL,
@@ -98,7 +115,7 @@ CREATE TABLE adjuntos_ticket (
     subido_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE mensajes_ticket (
+CREATE TABLE IF NOT EXISTS mensajes_ticket (
     id SERIAL PRIMARY KEY,
     ticket_id UUID NOT NULL REFERENCES tickets(id) ON DELETE CASCADE,
     remitente_id UUID NOT NULL REFERENCES usuarios(id),
@@ -106,7 +123,7 @@ CREATE TABLE mensajes_ticket (
     enviado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE bitacora_auditoria (
+CREATE TABLE IF NOT EXISTS bitacora_auditoria (
     id BIGSERIAL PRIMARY KEY,
     ticket_id UUID REFERENCES tickets(id) ON DELETE SET NULL,
     realizado_por UUID NOT NULL REFERENCES usuarios(id),
@@ -118,7 +135,7 @@ CREATE TABLE bitacora_auditoria (
     fecha_hora TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE banners_anuncios (
+CREATE TABLE IF NOT EXISTS banners_anuncios (
     id SERIAL PRIMARY KEY,
     titulo VARCHAR(150),
     url_imagen TEXT NOT NULL,
@@ -127,10 +144,12 @@ CREATE TABLE banners_anuncios (
     creado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE UNIQUE INDEX indice_unico_ticket_ingles_activo
+CREATE UNIQUE INDEX IF NOT EXISTS indice_unico_ticket_ingles_activo
 ON tickets (alumno_id, periodo_id)
 WHERE categoria = 'INGLES' AND estado NOT IN ('RECHAZADO', 'CERRADO');
 
-CREATE INDEX idx_tickets_filtros ON tickets(estado, categoria, periodo_id);
-CREATE INDEX idx_tickets_alumno ON tickets(alumno_id);
-CREATE INDEX idx_materias_carrera_semestre ON materias(carrera_id, semestre);
+CREATE INDEX IF NOT EXISTS idx_tickets_filtros ON tickets(estado, categoria, periodo_id);
+CREATE INDEX IF NOT EXISTS idx_tickets_alumno ON tickets(alumno_id);
+CREATE INDEX IF NOT EXISTS idx_materias_carrera_semestre ON materias(carrera_id, semestre);
+
+COMMIT;
