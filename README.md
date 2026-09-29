@@ -35,6 +35,10 @@ npm run db:studio
 
 La configuración de shadcn/ui está en `components.json`, preparada para Tailwind CSS 4. El primer componente disponible es `@/components/ui/button`; instala otros con `npx shadcn@latest add <componente>`.
 
+## Clientes de servicios
+
+`@/lib/prisma` exporta el cliente Prisma reutilizable para consultas PostgreSQL del lado del servidor. `@/lib/supabase` exporta `getSupabaseClient()` para acceder a Supabase Storage desde código de servidor. Configura `NEXT_PUBLIC_SUPABASE_URL` y `SUPABASE_SERVICE_ROLE_KEY` en `.env`; la clave de servicio es secreta y no debe usarse desde componentes cliente.
+
 El esquema crea 12 tablas, tipos enum e indices para filtrar tickets, consultar el historial por alumno y evitar tickets activos duplicados de ingles en un mismo periodo.
 
 ## Estado de la integracion
