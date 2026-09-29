@@ -127,8 +127,8 @@ CREATE TABLE banners_anuncios (
     creado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE UNIQUE INDEX indice_unico_ticket_ingles_activo 
-ON tickets (alumno_id, periodo_id) 
+CREATE UNIQUE INDEX indice_unico_ticket_ingles_activo
+ON tickets (alumno_id, periodo_id)
 WHERE categoria = 'INGLES' AND estado NOT IN ('RECHAZADO', 'CERRADO');
 
 CREATE INDEX idx_tickets_filtros ON tickets(estado, categoria, periodo_id);
