@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+      - integracion-api-main
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify application
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://postgres:local@localhost:5432/siam_db
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate Prisma schema
+        run: npx prisma validate
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder
+          SUPABASE_SERVICE_ROLE_KEY: placeholder
+        run: npm run build

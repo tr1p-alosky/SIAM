@@ -1,0 +1,218 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RolUsuario {
+  ALUMNO
+  COORDINADOR
+  ADMINISTRADOR
+
+  @@map("rol_usuario")
+}
+
+enum TipoTramite {
+  ALTA
+  BAJA
+  CAMBIO
+
+  @@map("tipo_tramite")
+}
+
+enum CategoriaMateria {
+  CURRICULAR
+  INGLES
+  EXTRACURRICULAR
+
+  @@map("categoria_materia")
+}
+
+enum EstadoTicket {
+  CREADO
+  EN_REVISION_COORDINACION
+  APROBADO_ADMIN
+  RECHAZADO
+  APLICADO_SISTEMA
+  CERRADO
+
+  @@map("estado_ticket")
+}
+
+model Usuario {
+  id                   String                      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  expediente           String                      @unique @db.VarChar(20)
+  correo               String                      @unique @db.VarChar(150)
+  contrasenaHash       String                      @map("contrasena_hash") @db.VarChar(255)
+  nombreCompleto       String                      @map("nombre_completo") @db.VarChar(150)
+  telefono             String?                     @db.VarChar(20)
+  rol                  RolUsuario?                 @default(ALUMNO)
+  secreto2fa           String?                     @map("secreto_2fa") @db.VarChar(100)
+  es2faActivo          Boolean?                    @default(false) @map("es_2fa_activo")
+  creadoEn             DateTime?                   @default(now()) @map("creado_en") @db.Timestamptz(6)
+  informacionAcademica InformacionAcademicaAlumno?
+  tickets              Ticket[]                    @relation("AlumnoTickets")
+  mensajes             MensajeTicket[]             @relation("RemitenteMensajes")
+  auditorias           BitacoraAuditoria[]         @relation("ActorAuditorias")
+
+  @@map("usuarios")
+}
+
+model Carrera {
+  id       Int                            @id @default(autoincrement())
+  nombre   String                         @db.VarChar(150)
+  clave    String                         @unique @db.VarChar(20)
+  alumnos  InformacionAcademicaAlumno[]
+  materias Materia[]
+
+  @@map("carreras")
+}
+
+model InformacionAcademicaAlumno {
+  alumnoId          String  @id @map("alumno_id") @db.Uuid
+  carreraId         Int     @map("carrera_id")
+  semestreActual    Int     @map("semestre_actual")
+  creditosTotales   Int?    @default(0) @map("creditos_totales")
+  creditosFaltantes Int?    @default(0) @map("creditos_faltantes")
+  alumno            Usuario @relation(fields: [alumnoId], references: [id], onDelete: Cascade)
+  carrera           Carrera @relation(fields: [carreraId], references: [id])
+
+  @@map("informacion_academica_alumnos")
+}
+
+model Materia {
+  id                   Int              @id @default(autoincrement())
+  carreraId            Int?             @map("carrera_id")
+  clave                String           @unique @db.VarChar(20)
+  nombre               String           @db.VarChar(150)
+  semestre             Int
+  categoria            CategoriaMateria? @default(CURRICULAR)
+  prerrequisitoId      Int?             @map("prerrequisito_id")
+  carrera              Carrera?         @relation(fields: [carreraId], references: [id], onDelete: Restrict)
+  prerrequisito        Materia?         @relation("Prerequisitos", fields: [prerrequisitoId], references: [id])
+  materiasDependientes Materia[]        @relation("Prerequisitos")
+  grupos               GrupoMateria[]
+  detallesTicket       DetalleTicket[]
+
+  @@index([carreraId, semestre], map: "idx_materias_carrera_semestre")
+  @@map("materias")
+}
+
+model GrupoMateria {
+  id               Int             @id @default(autoincrement())
+  materiaId        Int             @map("materia_id")
+  claveGrupo       String          @map("clave_grupo") @db.VarChar(10)
+  cupoMaximo       Int             @map("cupo_maximo")
+  cupoActual       Int?            @default(0) @map("cupo_actual")
+  permiteSobrecupo Boolean?        @default(false) @map("permite_sobrecupo")
+  detallesHorario  String?         @map("detalles_horario")
+  materia          Materia         @relation(fields: [materiaId], references: [id], onDelete: Cascade)
+  gruposOrigen     DetalleTicket[] @relation("GrupoOrigen")
+  gruposDestino    DetalleTicket[] @relation("GrupoDestino")
+
+  @@map("grupos_materia")
+}
+
+model PeriodoAcademico {
+  id          Int              @id @default(autoincrement())
+  nombre      String           @db.VarChar(50)
+  fechaInicio DateTime         @map("fecha_inicio") @db.Date
+  fechaFin    DateTime         @map("fecha_fin") @db.Date
+  categoria   CategoriaMateria
+  estaActivo  Boolean?         @default(true) @map("esta_activo")
+  tickets     Ticket[]
+
+  @@map("periodos_academicos")
+}
+
+model Ticket {
+  id            String             @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  folio         Int                @unique @default(autoincrement())
+  alumnoId      String             @map("alumno_id") @db.Uuid
+  periodoId     Int                @map("periodo_id")
+  tipoTramite   TipoTramite        @map("tipo_tramite")
+  categoria     CategoriaMateria?  @default(CURRICULAR)
+  estado        EstadoTicket?      @default(CREADO)
+  comentarios   String?
+  creadoEn      DateTime?          @default(now()) @map("creado_en") @db.Timestamptz(6)
+  actualizadoEn DateTime?          @default(now()) @map("actualizado_en") @db.Timestamptz(6)
+  alumno        Usuario            @relation("AlumnoTickets", fields: [alumnoId], references: [id], onDelete: Restrict)
+  periodo       PeriodoAcademico   @relation(fields: [periodoId], references: [id])
+  detalles      DetalleTicket[]
+  adjuntos      AdjuntoTicket[]
+  mensajes      MensajeTicket[]
+  auditorias    BitacoraAuditoria[]
+
+  @@index([estado, categoria, periodoId], map: "idx_tickets_filtros")
+  @@index([alumnoId], map: "idx_tickets_alumno")
+  // The partial unique index for active English tickets is defined in tablas.sql.
+  @@map("tickets")
+}
+
+model DetalleTicket {
+  id             Int           @id @default(autoincrement())
+  ticketId       String        @map("ticket_id") @db.Uuid
+  materiaId      Int           @map("materia_id")
+  grupoOrigenId  Int?          @map("grupo_origen_id")
+  grupoDestinoId Int?          @map("grupo_destino_id")
+  estaAprobado   Boolean?      @default(false) @map("esta_aprobado")
+  ticket         Ticket        @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  materia        Materia       @relation(fields: [materiaId], references: [id])
+  grupoOrigen    GrupoMateria? @relation("GrupoOrigen", fields: [grupoOrigenId], references: [id])
+  grupoDestino   GrupoMateria? @relation("GrupoDestino", fields: [grupoDestinoId], references: [id])
+
+  @@map("detalle_tickets")
+}
+
+model AdjuntoTicket {
+  id            Int       @id @default(autoincrement())
+  ticketId      String    @map("ticket_id") @db.Uuid
+  urlArchivo    String    @map("url_archivo")
+  nombreArchivo String    @map("nombre_archivo") @db.VarChar(255)
+  subidoEn      DateTime? @default(now()) @map("subido_en") @db.Timestamptz(6)
+  ticket        Ticket    @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@map("adjuntos_ticket")
+}
+
+model MensajeTicket {
+  id          Int       @id @default(autoincrement())
+  ticketId    String    @map("ticket_id") @db.Uuid
+  remitenteId String    @map("remitente_id") @db.Uuid
+  mensaje     String
+  enviadoEn   DateTime? @default(now()) @map("enviado_en") @db.Timestamptz(6)
+  ticket      Ticket    @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  remitente   Usuario   @relation("RemitenteMensajes", fields: [remitenteId], references: [id])
+
+  @@map("mensajes_ticket")
+}
+
+model BitacoraAuditoria {
+  id             BigInt    @id @default(autoincrement())
+  ticketId       String?   @map("ticket_id") @db.Uuid
+  realizadoPor   String    @map("realizado_por") @db.Uuid
+  accion         String    @db.VarChar(50)
+  estadoAnterior String?   @map("estado_anterior") @db.VarChar(50)
+  estadoNuevo    String?   @map("estado_nuevo") @db.VarChar(50)
+  descripcion    String?
+  direccionIp    String?   @map("direccion_ip") @db.VarChar(45)
+  fechaHora      DateTime? @default(now()) @map("fecha_hora") @db.Timestamptz(6)
+  ticket         Ticket?   @relation(fields: [ticketId], references: [id], onDelete: SetNull)
+  actor          Usuario  @relation("ActorAuditorias", fields: [realizadoPor], references: [id])
+
+  @@map("bitacora_auditoria")
+}
+
+model BannerAnuncio {
+  id         Int       @id @default(autoincrement())
+  titulo     String?   @db.VarChar(150)
+  urlImagen  String    @map("url_imagen")
+  urlDestino String?   @map("url_destino")
+  estaActivo Boolean?  @default(true) @map("esta_activo")
+  creadoEn   DateTime? @default(now()) @map("creado_en") @db.Timestamptz(6)
+
+  @@map("banners_anuncios")
+}
