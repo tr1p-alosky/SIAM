@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login con bcrypt</title>
+</head>
+<body>
+
+    <span class="header"></span>
+
+<div class="documentos">
+    <h1>Kardex</h1>
+    <form action="subir.php" method="POST" enctype="multipart/form-data">
+    <label for="archivo">Elige un archivo:</label>
+    <input type="file" id="pdfInput" accept="application/pdf">
+    <button id="cargarBtn">Cargar archivo</button>
+    <iframe id="pdfVista" style="width:100%; height:500px; margin-top:20px; display:none;"></iframe>
+
+    </form>
+
+   <h1>Documentacion</h1>
+    <form action="subir.php" method="POST" enctype="multipart/form-data">
+    <label for="archivo">Elige un archivo:</label>
+    <input type="file" id="archivo" name="mi_archivo">
+    <button type="submit">Cargar archivo</button>
+    </form>
+
+   <h1>Constancia</h1>
+    <form action="subir.php" method="POST" enctype="multipart/form-data">
+    <label for="archivo">Elige un archivo:</label>
+    <input type="file" id="archivo" name="mi_archivo">
+    <button type="submit">Cargar archivo</button>
+    </form>
+</div>
+
+</body>
+</html>
