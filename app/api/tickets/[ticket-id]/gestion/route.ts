@@ -16,11 +16,12 @@ const gestionSchema = z.object({
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { 'ticket-id': string } }
+  { params }: { params: Promise<{ 'ticket-id': string }> }
 ) {
   try {
     const coordinador = await requireRoles(request, ['COORDINADOR', 'ADMINISTRADOR']);
-    const ticketId = params['ticket-id'];
+    const resolvedParams = await params;
+    const ticketId = resolvedParams['ticket-id'];
 
     if (!ticketId) {
       return NextResponse.json(
