@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(
         {
           estatus: 'error',
-          mensaje: 'Parámetros de búsqueda no válidos',
+          mensaje: 'Parametros de busqueda no vlidos',
           'errores-validacion': queryResult.error.flatten().fieldErrors,
         },
         { status: 400 }
@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         estatus: 'error',
-        mensaje: 'Error interno del servidor al consultar el catálogo de materias',
+        mensaje: 'Error interno del servidor al consultar el catalogo de materias',
       },
       { status: 500 }
     );
