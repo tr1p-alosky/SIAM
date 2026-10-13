@@ -158,11 +158,11 @@ Cómo resolverlos
 - **2.1.2.- Modelo para Prisma**  
   - Crear las tablas principales a utilizar dentro de la base de datos del sistema, en PostgreeSQL:  
       
-- **2.1.3.- Conector a “lib/” (pendiente)**  
+- **2.1.3.- Conector a “lib/” (implementado; falta configurar Supabase)**
   - Crear dos archivos de código (`prisma.ts` y `supabase.ts`) que funcionan como "puentes". Sirven para conectar la aplicación con la base de datos y con el almacenamiento de archivos sin tener que repetir líneas de configuración en cada página.   
     Cambios principales  
       
-    **por qué pendiente?: el puente está escrito, pero faltan las credenciales y el bucket, y eso depende de tener configurado el proyecto Supabase. Las migraciones formales también pueden esperar hasta el primer cambio de estructura; por ahora las tablas ya están creadas y verificadas.**  
+    El conector de servidor está implementado para Supabase Auth y Storage. Para usarlo en un entorno real, falta configurar las credenciales del proyecto y crear el bucket indicado en `.env`; sin esa configuración, el build no necesita conectarse a Supabase, pero las rutas autenticadas no podrán validar sesiones. Las migraciones formales pueden esperar al primer cambio de estructura; por ahora las tablas ya están creadas y verificadas.
       
 * Se configuró Next.js con TypeScript, Tailwind CSS 4 y shadcn/ui; se añadió el componente Button.  
 * Se preparó PostgreSQL: tablas.sql define las 12 tablas, los tipos y los índices. También se creó schema.prisma para mapear las entidades y el comando npm run db:setup para aplicar el SQL.  

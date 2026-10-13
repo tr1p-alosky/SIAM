@@ -37,10 +37,12 @@ La configuración de shadcn/ui está en `components.json`, preparada para Tailwi
 
 ## Clientes de servicios
 
-`@/lib/prisma` exporta el cliente Prisma reutilizable para consultas PostgreSQL del lado del servidor. `@/lib/supabase` exporta `getSupabaseClient()` para acceder a Supabase Storage desde código de servidor. Configura `NEXT_PUBLIC_SUPABASE_URL` y `SUPABASE_SERVICE_ROLE_KEY` en `.env`; la clave de servicio es secreta y no debe usarse desde componentes cliente.
+`@/lib/prisma` exporta el cliente Prisma reutilizable para consultas PostgreSQL del lado del servidor. `@/lib/supabase` exporta `getSupabaseAuthClient()` para validar sesiones, `getSupabaseClient()` para operaciones administrativas de Storage y `getSupabaseStorageBucket()` para acceder al bucket configurado. Los clientes se crean al usarse, no durante el build.
+
+Para activar Supabase, copia los valores de **Project URL**, **anon/public key** y **service_role key** desde la configuración del proyecto a `.env`; conserva `SUPABASE_STORAGE_BUCKET` con el nombre exacto de un bucket creado en Storage (por defecto, `ticket-attachments`). Crea el bucket como privado para proteger documentos académicos. `NEXT_PUBLIC_SUPABASE_ANON_KEY` es pública; `SUPABASE_SERVICE_ROLE_KEY` es un secreto de servidor y nunca debe exponerse a componentes cliente ni subirse al repositorio. Sin estas credenciales la aplicación puede compilar, pero los endpoints autenticados responderán con error de configuración al recibir solicitudes.
 
 El esquema crea 12 tablas, tipos enum e indices para filtrar tickets, consultar el historial por alumno y evitar tickets activos duplicados de ingles en un mismo periodo.
 
 ## Estado de la integracion
 
-SIAM aportaba el esquema SQL y notas de preparacion. Sus archivos `sistema`, `componente`, `LIB.placeholder` y `Prisma.placeholder` solo contienen comentarios de marcador; la autenticacion y las interfaces de negocio siguen pendientes de implementacion.
+El login y el panel de coordinación incluidos actualmente son prototipos: el acceso de coordinación usa credenciales simuladas y el panel presenta datos locales que no modifican la base de datos. No usar en producción. Siguen pendientes la autenticación real y el middleware de roles, el panel de estudiante, la carga de documentos a Supabase Storage, el filtro de solicitudes y la resolución conectada a la API con observación obligatoria. Estos puntos corresponden a los requisitos de la interfaz del sistema.

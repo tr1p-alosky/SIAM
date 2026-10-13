@@ -1,6 +1,6 @@
-import { createClient } from "@supabase/supabase-js";
 import { RolUsuario } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { getSupabaseAuthClient } from "@/lib/supabase";
 
 export class ApiAuthError extends Error {
   constructor(
@@ -19,22 +19,6 @@ export type AuthenticatedUser = {
   rol: RolUsuario;
 };
 
-function getSupabaseAdminClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anonymousKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!url || !anonymousKey) {
-    throw new ApiAuthError("La configuración de Supabase no está disponible", 500);
-  }
-
-  return createClient(url, anonymousKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  });
-}
-
 export async function requireAuthenticatedUser(
   request: Request,
 ): Promise<AuthenticatedUser> {
@@ -47,7 +31,15 @@ export async function requireAuthenticatedUser(
     throw new ApiAuthError("Debe iniciar sesión para acceder a esta API", 401);
   }
 
-  const supabase = getSupabaseAdminClient();
+  let supabase: ReturnType<typeof getSupabaseAuthClient>;
+
+  try {
+    supabase = getSupabaseAuthClient();
+  } catch (error) {
+    console.error("Error en la configuración de autenticación de Supabase", error);
+    throw new ApiAuthError("La configuración de Supabase no está disponible", 500);
+  }
+
   const { data, error } = await supabase.auth.getUser(accessToken);
 
   if (error || !data.user.email) {

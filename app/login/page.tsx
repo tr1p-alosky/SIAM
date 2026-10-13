@@ -22,9 +22,10 @@ export default function LoginPage() {
       if (email === 'coordinador@siam.edu' && password === '123456') {
         router.push('/dashboard/coordinator');
       } else if (email === 'estudiante@siam.edu' && password === '123456') {
-        router.push('/dashboard/student');
+        setError('El panel de estudiante todavía no está implementado.');
+        setIsLoading(false);
       } else {
-        setError('Credenciales incorrectas. Usa coordinador@siam.edu o estudiante@siam.edu (Contraseña: 123456)');
+        setError('Credenciales de demostración incorrectas.');
         setIsLoading(false);
       }
     }, 800);
@@ -92,9 +93,8 @@ export default function LoginPage() {
 
         {/* Guía rápida de prueba */}
         <div className="bg-gray-50 p-3 rounded-lg border text-xs text-gray-500 space-y-1">
-          <p className="font-semibold text-gray-700">Credenciales para probarr:</p>
-          <p>• <b>Coordinador:</b> admin@coordinador.edu - 123456</p>
-          <p>• <b>Estudiante:</b> usuario@estudiante.edu - 123456</p>
+          <p className="font-semibold text-gray-700">Acceso de demostración (no es autenticación real):</p>
+          <p>• <b>Coordinador:</b> coordinador@siam.edu - 123456</p>
         </div>
 
       </div>
