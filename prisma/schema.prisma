@@ -77,8 +77,8 @@ model InformacionAcademicaAlumno {
   semestreActual    Int     @map("semestre_actual")
   creditosTotales   Int?    @default(0) @map("creditos_totales")
   creditosFaltantes Int?    @default(0) @map("creditos_faltantes")
-  alumno            Usuario @relation(fields: [alumnoId], references: [id], onDelete: Cascade)
-  carrera           Carrera @relation(fields: [carreraId], references: [id])
+  alumno            Usuario @relation(fields: [alumnoId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  carrera           Carrera @relation(fields: [carreraId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("informacion_academica_alumnos")
 }
@@ -91,8 +91,8 @@ model Materia {
   semestre             Int
   categoria            CategoriaMateria? @default(CURRICULAR)
   prerrequisitoId      Int?             @map("prerrequisito_id")
-  carrera              Carrera?         @relation(fields: [carreraId], references: [id], onDelete: Restrict)
-  prerrequisito        Materia?         @relation("Prerequisitos", fields: [prerrequisitoId], references: [id])
+  carrera              Carrera?         @relation(fields: [carreraId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  prerrequisito        Materia?         @relation("Prerequisitos", fields: [prerrequisitoId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   materiasDependientes Materia[]        @relation("Prerequisitos")
   grupos               GrupoMateria[]
   detallesTicket       DetalleTicket[]
@@ -109,7 +109,7 @@ model GrupoMateria {
   cupoActual       Int?            @default(0) @map("cupo_actual")
   permiteSobrecupo Boolean?        @default(false) @map("permite_sobrecupo")
   detallesHorario  String?         @map("detalles_horario")
-  materia          Materia         @relation(fields: [materiaId], references: [id], onDelete: Cascade)
+  materia          Materia         @relation(fields: [materiaId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   gruposOrigen     DetalleTicket[] @relation("GrupoOrigen")
   gruposDestino    DetalleTicket[] @relation("GrupoDestino")
 
@@ -139,8 +139,8 @@ model Ticket {
   comentarios   String?
   creadoEn      DateTime?          @default(now()) @map("creado_en") @db.Timestamptz(6)
   actualizadoEn DateTime?          @default(now()) @map("actualizado_en") @db.Timestamptz(6)
-  alumno        Usuario            @relation("AlumnoTickets", fields: [alumnoId], references: [id], onDelete: Restrict)
-  periodo       PeriodoAcademico   @relation(fields: [periodoId], references: [id])
+  alumno        Usuario            @relation("AlumnoTickets", fields: [alumnoId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  periodo       PeriodoAcademico   @relation(fields: [periodoId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   detalles      DetalleTicket[]
   adjuntos      AdjuntoTicket[]
   mensajes      MensajeTicket[]
@@ -159,10 +159,10 @@ model DetalleTicket {
   grupoOrigenId  Int?          @map("grupo_origen_id")
   grupoDestinoId Int?          @map("grupo_destino_id")
   estaAprobado   Boolean?      @default(false) @map("esta_aprobado")
-  ticket         Ticket        @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-  materia        Materia       @relation(fields: [materiaId], references: [id])
-  grupoOrigen    GrupoMateria? @relation("GrupoOrigen", fields: [grupoOrigenId], references: [id])
-  grupoDestino   GrupoMateria? @relation("GrupoDestino", fields: [grupoDestinoId], references: [id])
+  ticket         Ticket        @relation(fields: [ticketId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  materia        Materia       @relation(fields: [materiaId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  grupoOrigen    GrupoMateria? @relation("GrupoOrigen", fields: [grupoOrigenId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  grupoDestino   GrupoMateria? @relation("GrupoDestino", fields: [grupoDestinoId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("detalle_tickets")
 }
@@ -173,7 +173,7 @@ model AdjuntoTicket {
   urlArchivo    String    @map("url_archivo")
   nombreArchivo String    @map("nombre_archivo") @db.VarChar(255)
   subidoEn      DateTime? @default(now()) @map("subido_en") @db.Timestamptz(6)
-  ticket        Ticket    @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  ticket        Ticket    @relation(fields: [ticketId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@map("adjuntos_ticket")
 }
@@ -184,8 +184,8 @@ model MensajeTicket {
   remitenteId String    @map("remitente_id") @db.Uuid
   mensaje     String
   enviadoEn   DateTime? @default(now()) @map("enviado_en") @db.Timestamptz(6)
-  ticket      Ticket    @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-  remitente   Usuario   @relation("RemitenteMensajes", fields: [remitenteId], references: [id])
+  ticket      Ticket    @relation(fields: [ticketId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  remitente   Usuario   @relation("RemitenteMensajes", fields: [remitenteId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("mensajes_ticket")
 }
@@ -200,8 +200,8 @@ model BitacoraAuditoria {
   descripcion    String?
   direccionIp    String?   @map("direccion_ip") @db.VarChar(45)
   fechaHora      DateTime? @default(now()) @map("fecha_hora") @db.Timestamptz(6)
-  ticket         Ticket?   @relation(fields: [ticketId], references: [id], onDelete: SetNull)
-  actor          Usuario  @relation("ActorAuditorias", fields: [realizadoPor], references: [id])
+  ticket         Ticket?   @relation(fields: [ticketId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  actor          Usuario  @relation("ActorAuditorias", fields: [realizadoPor], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("bitacora_auditoria")
 }
