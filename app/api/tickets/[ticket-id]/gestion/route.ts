@@ -6,8 +6,8 @@ import { requireRoles } from '@/lib/auth';
 import { apiErrorResponse } from '@/lib/api-response';
 
 const gestionSchema = z.object({
-  'accion-resolucion': z.enum(['APROBAR', 'RECHAZAR'], {
-    required_error: 'La acción de resolución debe ser APROBAR o RECHAZAR',
+  'accion-resolucion': z.enum(['APROBAR', 'RECHAZAR', 'CERRAR'], {
+    required_error: 'La acción de resolución debe ser APROBAR, RECHAZAR o CERRAR',
   }),
   'observacion-coordinador': z
     .string({ required_error: 'La observación o motivo de resolución es obligatorio' })
@@ -33,7 +33,18 @@ export async function PATCH(
       );
     }
 
-    const body = await request.json();
+    const body = await request.json().catch(() => null);
+
+    if (!body) {
+      return NextResponse.json(
+        {
+          estatus: 'error',
+          mensaje: 'El cuerpo de la petición no puede estar vacío',
+        },
+        { status: 400 }
+      );
+    }
+
     const validation = gestionSchema.safeParse(body);
 
     if (!validation.success) {
@@ -66,10 +77,14 @@ export async function PATCH(
     }
 
     const estadoAnterior = ticketExistente.estado;
-    const nuevoEstado =
-      accionResolucion === 'APROBAR'
-        ? EstadoTicket.APROBADO_ADMIN
-        : EstadoTicket.RECHAZADO;
+    let nuevoEstado: EstadoTicket;
+    if (accionResolucion === 'APROBAR') {
+      nuevoEstado = EstadoTicket.APROBADO_ADMIN;
+    } else if (accionResolucion === 'RECHAZAR') {
+      nuevoEstado = EstadoTicket.RECHAZADO;
+    } else {
+      nuevoEstado = EstadoTicket.CERRADO;
+    }
 
     // Transacción Prisma: Actualiza Ticket + Registro de Auditoría
     const ticketActualizado = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
@@ -81,7 +96,7 @@ export async function PATCH(
         },
       });
 
-      // Registrar en Bitácora de Auditoría
+      // Registrar en Bitácora de Auditoría (Trazabilidad obligatoria)
       await tx.bitacoraAuditoria.create({
         data: {
           ticketId: ticket.id,
@@ -94,7 +109,7 @@ export async function PATCH(
         },
       });
 
-      // Si hay mensaje del coordinador, registrarlo en la conversación
+      // Si hay mensaje del coordinador, registrarlo en la conversación interna
       await tx.mensajeTicket.create({
         data: {
           ticketId: ticket.id,
@@ -106,10 +121,17 @@ export async function PATCH(
       return ticket;
     });
 
+    const accionVerbo =
+      accionResolucion === 'APROBAR'
+        ? 'aprobada'
+        : accionResolucion === 'RECHAZAR'
+        ? 'rechazada'
+        : 'cerrada';
+
     return NextResponse.json(
       {
         estatus: 'exito',
-        mensaje: `La solicitud ha sido ${accionResolucion === 'APROBAR' ? 'aprobada' : 'rechazada'} correctamente`,
+        mensaje: `La solicitud ha sido ${accionVerbo} correctamente`,
         'ticket-actualizado': {
           'ticket-id': ticketActualizado.id,
           'folio-ticket': `TCK-${new Date(ticketActualizado.creadoEn || Date.now()).getFullYear()}-${String(ticketActualizado.folio).padStart(4, '0')}`,

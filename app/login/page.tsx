@@ -7,28 +7,58 @@ export default function LoginPage() {
   const router = useRouter();
   
   // Estados para capturar los datos del formulario
-  const [email, setEmail] = useState('');
+  const [identificador, setIdentificador] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [mensajeExito, setMensajeExito] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setMensajeExito('');
     setIsLoading(true);
 
-    // Simulación de validación de credenciales
-    setTimeout(() => {
-      if (email === 'coordinador@siam.edu' && password === '123456') {
-        router.push('/dashboard/coordinator');
-      } else if (email === 'estudiante@siam.edu' && password === '123456') {
-        setError('El panel de estudiante todavía no está implementado.');
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          'correo-institucional': identificador.includes('@') ? identificador : undefined,
+          'expediente-alumno': !identificador.includes('@') ? identificador : undefined,
+          'contrasena-usuario': password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.mensaje || 'Error al iniciar sesión con las credenciales ingresadas.');
         setIsLoading(false);
+        return;
+      }
+
+      // Guardar token en localStorage
+      if (data['token-acceso']) {
+        localStorage.setItem('siam_token', data['token-acceso']);
+        localStorage.setItem('siam_user', JSON.stringify(data['datos-usuario']));
+      }
+
+      const rol = data['datos-usuario']?.['rol-usuario'];
+      if (rol === 'COORDINADOR' || rol === 'ADMINISTRADOR') {
+        router.push('/dashboard/coordinator');
       } else {
-        setError('Credenciales de demostración incorrectas.');
+        setMensajeExito(
+          `¡Bienvenido, ${data['datos-usuario']?.['nombre-completo']}! Sesión iniciada correctamente.`
+        );
         setIsLoading(false);
       }
-    }, 800);
+    } catch {
+      setError('Ocurrió un error de conexión con el servidor. Intente nuevamente.');
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -39,7 +69,7 @@ export default function LoginPage() {
         <div className="text-center">
           <h2 className="text-3xl font-bold text-gray-900">Sistema SIAM</h2>
           <p className="mt-2 text-sm text-gray-600">
-            Ingresa tus credenciales para acceder a la plataforma
+            Ingresa tus credenciales para acceder a la plataforma UAQ
           </p>
         </div>
 
@@ -50,19 +80,26 @@ export default function LoginPage() {
           </div>
         )}
 
+        {/* Mensaje de éxito */}
+        {mensajeExito && (
+          <div className="bg-green-50 border border-green-200 text-green-800 text-sm rounded-lg p-3">
+            {mensajeExito}
+          </div>
+        )}
+
         {/* Formulario */}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Correo institucional / Matrícula
+                Correo institucional / Matrícula o Expediente
               </label>
               <input
-                type="email"
+                type="text"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                //placeholder="usuario@siam.edu"
+                value={identificador}
+                onChange={(e) => setIdentificador(e.target.value)}
+                placeholder="ejemplo@siam.local o SEEDCOORD001"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
               />
             </div>
@@ -76,7 +113,7 @@ export default function LoginPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                //placeholder="••••••••"
+                placeholder="••••••••••••"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
               />
             </div>
@@ -87,14 +124,16 @@ export default function LoginPage() {
             disabled={isLoading}
             className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-colors"
           >
-            {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+            {isLoading ? 'Verificando credenciales...' : 'Iniciar Sesión'}
           </button>
         </form>
 
-        {/* Guía rápida de prueba */}
-        <div className="bg-gray-50 p-3 rounded-lg border text-xs text-gray-500 space-y-1">
-          <p className="font-semibold text-gray-700">Acceso de demostración (no es autenticación real):</p>
-          <p>• <b>Coordinador:</b> coordinador@siam.edu - 123456</p>
+        {/* Guía de acceso con datos de base de datos */}
+        <div className="bg-gray-50 p-3 rounded-lg border text-xs text-gray-600 space-y-1">
+          <p className="font-semibold text-gray-800">Cuentas activas en base de datos local:</p>
+          <p>• <b>Coordinador:</b> coordinacion.seed@siam.local | PasswordSeguro1234</p>
+          <p>• <b>Alumno 1:</b> alumno1.seed@siam.local | PasswordSeguro1234</p>
+          <p>• <b>Alumno 2:</b> alumno2.seed@siam.local | PasswordSeguro1234</p>
         </div>
 
       </div>
