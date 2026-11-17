@@ -270,7 +270,37 @@ async function main() {
       });
     }
 
-    console.info(`Seed listo: ${coordinador.correo}, ${alumnos.length} alumnos, ${tickets.length} tickets.`);
+    const bannersSeed = [
+      {
+        titulo: "Periodo Oficial de Altas y Bajas 2026-2",
+        urlImagen: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1200&auto=format&fit=crop&q=80",
+        urlDestino: "/login?tramite=curricular",
+        estaActivo: true,
+      },
+      {
+        titulo: "Sistema Especial de Lengua Extranjera (Inglés UAQ)",
+        urlImagen: "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=1200&auto=format&fit=crop&q=80",
+        urlDestino: "/login?tramite=ingles",
+        estaActivo: true,
+      },
+      {
+        titulo: "Requisitos y Carga de Evidencias (Kardex e Identificación)",
+        urlImagen: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=1200&auto=format&fit=crop&q=80",
+        urlDestino: "/login",
+        estaActivo: true,
+      },
+    ];
+
+    for (const b of bannersSeed) {
+      const bannerExistente = await tx.bannerAnuncio.findFirst({
+        where: { titulo: b.titulo },
+      });
+      if (!bannerExistente) {
+        await tx.bannerAnuncio.create({ data: b });
+      }
+    }
+
+    console.info(`Seed listo: ${coordinador.correo}, ${alumnos.length} alumnos, ${tickets.length} tickets, ${bannersSeed.length} banners.`);
   });
 }
 

@@ -46,14 +46,16 @@ export default function LoginPage() {
         localStorage.setItem('siam_user', JSON.stringify(data['datos-usuario']));
       }
 
+      const searchParams = new URLSearchParams(window.location.search);
+      const redirectParam = searchParams.get('redirect');
+
       const rol = data['datos-usuario']?.['rol-usuario'];
-      if (rol === 'COORDINADOR' || rol === 'ADMINISTRADOR') {
+      if (redirectParam) {
+        router.push(redirectParam);
+      } else if (rol === 'COORDINADOR' || rol === 'ADMINISTRADOR') {
         router.push('/dashboard/coordinator');
       } else {
-        setMensajeExito(
-          `¡Bienvenido, ${data['datos-usuario']?.['nombre-completo']}! Sesión iniciada correctamente.`
-        );
-        setIsLoading(false);
+        router.push('/dashboard/student');
       }
     } catch {
       setError('Ocurrió un error de conexión con el servidor. Intente nuevamente.');
