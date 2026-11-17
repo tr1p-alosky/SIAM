@@ -85,10 +85,10 @@ export function InstitutionalCarousel({ banners }: InstitutionalCarouselProps) {
                   </svg>
                 </Link>
                 <Link
-                  href="#calendario"
+                  href="#tramites"
                   className="inline-flex items-center justify-center px-5 py-3 rounded-xl font-semibold text-sm bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm transition"
                 >
-                  Ver Calendario
+                  Ver Trámites
                 </Link>
               </div>
             </div>

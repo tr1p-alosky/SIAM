@@ -54,12 +54,12 @@ export default async function HomePage() {
           }
           return {
             id: b.id,
-            titulo: b.titulo || 'Evidencias y Documentos Obligatorios',
+            titulo: b.titulo || 'Evidencias y Documentos',
             urlImagen: b.urlImagen,
             urlDestino: b.urlDestino || '/login',
-            etiqueta: 'Requisito RF03',
+            etiqueta: 'Documentación',
             subtitulo:
-              'Asegúrate de tener listo tu Kardex actualizado e Identificación Oficial en PDF o imagen para adjuntarlos a tu solicitud.',
+              'Ten a la mano tu Kardex actualizado e Identificación Oficial en PDF o imagen para adjuntarlos directamente a tu solicitud.',
             botonTexto: 'Iniciar Sesión',
             botonColor: 'bg-white hover:bg-gray-100 text-blue-950',
           };
@@ -111,12 +111,6 @@ export default async function HomePage() {
             </Link>
             <Link href="#ingles" className="hover:text-amber-300 transition">
               Módulo Inglés
-            </Link>
-            <Link href="#requisitos" className="hover:text-amber-300 transition">
-              Requisitos
-            </Link>
-            <Link href="#calendario" className="hover:text-amber-300 transition">
-              Calendario
             </Link>
             <Link href="#soporte" className="hover:text-amber-300 transition">
               Soporte
@@ -231,118 +225,6 @@ export default async function HomePage() {
               >
                 Trámite de Inglés
               </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* Sección Informativa: Requisitos y Reglas de Negocio (RF03, RF04, RF05) */}
-        <section id="requisitos" className="bg-white rounded-3xl p-8 sm:p-10 border border-gray-200 shadow-sm space-y-8">
-          <div className="border-b border-gray-100 pb-4">
-            <span className="text-xs font-bold uppercase tracking-wider text-blue-600">
-              Lineamientos Institucionales
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 pt-1">
-              Requisitos Obligatorios y Reglas de Negocio
-            </h2>
-            <p className="text-sm text-gray-600">
-              Asegúrate de cumplir con los siguientes puntos antes de enviar tu ticket a Coordinación:
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="space-y-2 p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
-              <div className="font-bold text-sm text-gray-900 flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs">
-                  1
-                </span>
-                Evidencias Obligatorias
-              </div>
-              <p className="text-xs text-gray-600 leading-relaxed">
-                Es mandatorio adjuntar tu Kardex oficial actualizado o identificación vigente en formato PDF o imagen legible (RF03).
-              </p>
-            </div>
-
-            <div className="space-y-2 p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
-              <div className="font-bold text-sm text-gray-900 flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs">
-                  2
-                </span>
-                Límites por Alumno
-              </div>
-              <p className="text-xs text-gray-600 leading-relaxed">
-                Máximo 5 materias por alumno en el periodo y no más de 2 trámites activos simultáneos por materia curricular (RF04).
-              </p>
-            </div>
-
-            <div className="space-y-2 p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
-              <div className="font-bold text-sm text-gray-900 flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs">
-                  3
-                </span>
-                Restricción de Inglés
-              </div>
-              <p className="text-xs text-gray-600 leading-relaxed">
-                Límite estricto de 1 solo ticket activo de inglés por periodo. Debes esperar su resolución antes de generar otro (RF04/RF05).
-              </p>
-            </div>
-
-            <div className="space-y-2 p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
-              <div className="font-bold text-sm text-gray-900 flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs">
-                  4
-                </span>
-                Trazabilidad y Auditoría
-              </div>
-              <p className="text-xs text-gray-600 leading-relaxed">
-                Cada resolución genera un folio inmutable registrado en la bitácora institucional con fecha, hora e IP (RNF03).
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Sección Calendario y Ventana de Operación (RNF04) */}
-        <section id="calendario" className="space-y-6">
-          <div className="text-center max-w-2xl mx-auto space-y-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-amber-600 bg-amber-100/60 px-3 py-1 rounded-full">
-              Fechas Clave
-            </span>
-            <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">
-              Ventana Temporal de Operación
-            </h2>
-            <p className="text-sm text-gray-600">
-              El sistema opera durante las primeras 3 semanas del semestre académico (RNF04).
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-3">
-              <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg">
-                Fase 1: Semanas 1 y 2
-              </span>
-              <h3 className="font-bold text-base text-gray-900">Recepción de Solicitudes</h3>
-              <p className="text-xs text-gray-600 leading-relaxed">
-                Captura de trámites por parte de los alumnos, selección de grupo y subida de archivos probatorios.
-              </p>
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-3">
-              <span className="text-xs font-bold text-purple-600 bg-purple-50 px-2.5 py-1 rounded-lg">
-                Fase 2: Semana 3
-              </span>
-              <h3 className="font-bold text-base text-gray-900">Dictamen de Coordinación</h3>
-              <p className="text-xs text-gray-600 leading-relaxed">
-                Revisión de cupos, autorización de sobrecupos por excepción y emisión de resolución con observaciones.
-              </p>
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-3">
-              <span className="text-xs font-bold text-green-600 bg-green-50 px-2.5 py-1 rounded-lg">
-                Fase 3: Cierre de Ventana
-              </span>
-              <h3 className="font-bold text-base text-gray-900">Aplicación en Sistema</h3>
-              <p className="text-xs text-gray-600 leading-relaxed">
-                Consolidación de listas oficiales, exportación a reportes administrativos y cierre del periodo de trámites.
-              </p>
             </div>
           </div>
         </section>
