@@ -82,3 +82,54 @@ body {
   background: var(--background);
   color: var(--foreground);
 }
+
+/* ARCHIVOS */
+
+.documentos {
+  max-width: 720px;
+  margin: 40px auto;
+  padding: 24px;
+  font-family: system-ui, sans-serif;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.documentos form {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.documentos input[type='file'] {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.documentos button {
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.documentos button:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+}
+
+.mensaje {
+  color: #334155;
+}
+
+.vista-pdf {
+  width: 100%;
+  height: 500px;
+  margin-top: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
